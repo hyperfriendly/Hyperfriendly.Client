@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace HyperFriendly.Client
 {
@@ -24,5 +25,11 @@ namespace HyperFriendly.Client
         }
 
         public HttpResponseMessage CurrentResult { get; private set; }
+
+        public async Task<dynamic> ResultAsJson()
+        {
+            var content = await CurrentResult.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject(content);
+        }
     }
 }
