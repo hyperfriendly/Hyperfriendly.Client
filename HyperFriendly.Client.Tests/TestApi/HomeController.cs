@@ -11,7 +11,25 @@ namespace HyperFriendly.Client.Tests.TestApi
         {
             var resource = new
             {
-                _links = new { self = new { href = Url.Link("Home", null) } }
+                _links = new
+                {
+                    self = new { href = Url.Link("Home", null) },
+                    some_resource = new { href = Url.Link("SomeResource", null)}
+                }
+            };
+            return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
+        }
+
+        [Route("someresource", Name = "SomeResource")]
+        public HttpResponseMessage GetSomeResource()
+        {
+            var resource = new
+            {
+                _links = new
+                {
+                    self = new { href = Url.Link("SomeResource", null) }
+                },
+                type = "some_resource"
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
         }
