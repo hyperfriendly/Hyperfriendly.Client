@@ -13,8 +13,9 @@ namespace HyperFriendly.Client.Tests.TestApi
             {
                 _links = new
                 {
-                    self = new { href = Url.Link("Home", null) },
-                    some_resource = new { href = Url.Link("SomeResource", null)}
+                    self = new { href = "/" },
+                    some_resource = new { href = "/someresource" },
+                    templated_resource = new { href = "/templated?foo={foo}" },
                 }
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
@@ -27,9 +28,23 @@ namespace HyperFriendly.Client.Tests.TestApi
             {
                 _links = new
                 {
-                    self = new { href = Url.Link("SomeResource", null) }
+                    self = new { href = "/someresource" }
                 },
                 type = "some_resource"
+            };
+            return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
+        }
+
+        [Route("templated", Name = "TemplatedResource")]
+        public HttpResponseMessage GetTemplatedResource(string foo)
+        {
+            var resource = new
+            {
+                _links = new
+                {
+                    self = new { href = "/someresource?foo=" + foo }
+                },
+                type = "templated_resource"
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
         }
