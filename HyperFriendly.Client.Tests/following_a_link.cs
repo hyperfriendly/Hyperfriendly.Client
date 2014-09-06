@@ -23,6 +23,30 @@ namespace HyperFriendly.Client.Tests
             json.Value<string>("type").ShouldEqual("some_resource");
         }
 
+        [Fact]
+        public async Task can_follow_is_true_when_rel_exists()
+        {
+            var testServer = TestServer.Create<StartUp>();
+            var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
+            client = await client.Root();
+
+            var canFollow = await client.CanFollow("some_resource");
+
+            canFollow.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task can_follow_is_true_when_rel_does_not_exist()
+        {
+            var testServer = TestServer.Create<StartUp>();
+            var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
+            client = await client.Root();
+
+            var canFollow = await client.CanFollow("not_a_resource");
+
+            canFollow.ShouldBeFalse();
+        }
+
         [Theory]
         [InlineData("post_resource")]
         [InlineData("put_resource")]

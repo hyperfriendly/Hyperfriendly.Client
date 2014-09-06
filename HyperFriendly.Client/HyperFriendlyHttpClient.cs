@@ -73,7 +73,12 @@ namespace HyperFriendly.Client
         {
             JToken json = await ResultAsJson();
             var link = json.SelectToken("_links." + rel);
-            return link.ToObject<Link>();
+            return link == null ? null : link.ToObject<Link>();
+        }
+
+        public async Task<bool> CanFollow(string rel)
+        {
+            return await GetLink(rel) != null;
         }
     }
 }
