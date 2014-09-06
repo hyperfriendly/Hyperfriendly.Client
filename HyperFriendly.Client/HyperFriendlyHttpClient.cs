@@ -44,46 +44,37 @@ namespace HyperFriendly.Client
             return json.SelectToken("_items").Select(t => t.ToObject<T>());
         }
 
-        public async Task<HyperFriendlyHttpClient> Root()
+        public async Task Root()
         {
             var result = await _httpClient.GetAsync(_rootUri);
-            return new HyperFriendlyHttpClient(_httpClient, _rootUri)
-            {
-                CurrentResult = result
-            };
+            CurrentResult = result;
         }
 
-        public async Task<HyperFriendlyHttpClient> Follow(string rel)
+        public async Task Follow(string rel)
         {
             var link = await GetLink(rel);
 
-            return await GetResult(link.Href, link.HttpMethod);
+            await GetResult(link.Href, link.HttpMethod);
         }
 
-        public async Task<HyperFriendlyHttpClient> Follow(string rel, object arguments)
+        public async Task Follow(string rel, object arguments)
         {
             var link = await GetLink(rel);
             var href = _queryStringComposer.Compose(link.Href, arguments);
-            return await GetResult(href, link.HttpMethod);
+            await GetResult(href, link.HttpMethod);
         }
 
-        private async Task<HyperFriendlyHttpClient> GetResult(string href, HttpMethod httpMethod)
+        private async Task GetResult(string href, HttpMethod httpMethod)
         {
             var result = await _httpClient.SendAsync(new HttpRequestMessage(httpMethod, href));
-            return new HyperFriendlyHttpClient(_httpClient, _rootUri)
-            {
-                CurrentResult = result
-            };
+            CurrentResult = result;
         }
 
-        public async Task<HyperFriendlyHttpClient> Follow()
+        public async Task Follow()
         {
             var location = CurrentResult.Headers.Location;
             var result = await _httpClient.GetAsync(location.ToString());
-            return new HyperFriendlyHttpClient(_httpClient, _rootUri)
-            {
-                CurrentResult = result
-            };
+            CurrentResult = result;
         }
 
         private async Task<Link> GetLink(string rel)

@@ -15,9 +15,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            var response = await client.Root();
+            await client.Root();
 
-            response.CurrentResult.IsSuccessStatusCode.ShouldBeTrue("Actual: " + response.CurrentResult.StatusCode);
+            client.CurrentResult.IsSuccessStatusCode.ShouldBeTrue("Actual: " + client.CurrentResult.StatusCode);
         }
 
         [Fact]
@@ -26,8 +26,8 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            var response = await client.Root();
-            JToken jsonResult = await response.ResultAsJson();
+            await client.Root();
+            JToken jsonResult = await client.ResultAsJson();
 
             jsonResult
                 .SelectToken("_links.self.href")

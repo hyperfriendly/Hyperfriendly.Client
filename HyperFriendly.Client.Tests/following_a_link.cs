@@ -16,8 +16,8 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            client = await client.Root();
-            client = await client.Follow("some_resource");
+            await client.Root();
+            await client.Follow("some_resource");
             JToken json = await client.ResultAsJson();
 
             json.Value<string>("type").ShouldEqual("some_resource");
@@ -29,8 +29,8 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            client = await client.Root();
-            client = await client.Follow("some_resource");
+            await client.Root();
+            await client.Follow("some_resource");
             SomeResource resource = await client.Result<SomeResource>();
 
             resource.Type.ShouldEqual("some_resource");
@@ -41,7 +41,7 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            client = await client.Root();
+            await client.Root();
 
             var canFollow = await client.CanFollow("some_resource");
 
@@ -53,7 +53,7 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            client = await client.Root();
+            await client.Root();
 
             var canFollow = await client.CanFollow("not_a_resource");
 
@@ -69,8 +69,8 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            client = await client.Root();
-            client = await client.Follow(rel);
+            await client.Root();
+            await client.Follow(rel);
             JToken json = await client.ResultAsJson();
 
             json.Value<string>("type").ShouldEqual(rel);

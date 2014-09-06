@@ -14,9 +14,9 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            client = await client.Root();
+            await client.Root();
 
-            client = await client.Follow("templated_resource", new { foo = "bar" });
+            await client.Follow("templated_resource", new { foo = "bar" });
             JToken json = await client.ResultAsJson();
 
             json.Value<string>("type").ShouldEqual("templated_resource");

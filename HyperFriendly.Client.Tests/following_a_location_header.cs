@@ -15,9 +15,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            client = await client.Root();
-            client = await client.Follow("redirecting_resource");
-            client = await client.Follow();
+            await client.Root();
+            await client.Follow("redirecting_resource");
+            await client.Follow();
             JToken json = await client.ResultAsJson();
 
             json.Value<string>("type").ShouldEqual("resource_that_is_redirected_to");
