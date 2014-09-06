@@ -32,10 +32,6 @@ namespace HyperFriendly.Client.Tests.TestApi
         {
             var resource = new
             {
-                _links = new
-                {
-                    self = new { href = "/someresource" }
-                },
                 type = "some_resource"
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
@@ -46,10 +42,6 @@ namespace HyperFriendly.Client.Tests.TestApi
         {
             var resource = new
             {
-                _links = new
-                {
-                    self = new { href = "/collection_resource" }
-                },
                 _items = new[]
                 {
                     new { type = "some_resource"},
@@ -62,35 +54,34 @@ namespace HyperFriendly.Client.Tests.TestApi
         [Route("post_resource")]
         public HttpResponseMessage Post()
         {
-            var resource = CreateResource("post_resource");
+            var resource1 = new
+            {
+                type = "post_resource"
+            };
+            var resource = (object) resource1;
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
         }
 
         [Route("put_resource")]
         public HttpResponseMessage Put()
         {
-            var resource = CreateResource("put_resource");
+            var resource1 = new
+            {
+                type = "put_resource"
+            };
+            var resource = (object) resource1;
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
         }
 
         [Route("delete_resource")]
         public HttpResponseMessage Delete()
         {
-            var resource = CreateResource("delete_resource");
-            return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
-        }
-
-        private static object CreateResource(string rel)
-        {
-            var resource = new
+            var resource1 = new
             {
-                _links = new
-                {
-                    self = new { href = "/" + rel }
-                },
-                type = rel
+                type = "delete_resource"
             };
-            return resource;
+            var resource = (object) resource1;
+            return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
         }
 
         [Route("templated")]
@@ -98,10 +89,6 @@ namespace HyperFriendly.Client.Tests.TestApi
         {
             var resource = new
             {
-                _links = new
-                {
-                    self = new { href = "/someresource?foo=" + foo }
-                },
                 type = "templated_resource"
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
@@ -121,10 +108,6 @@ namespace HyperFriendly.Client.Tests.TestApi
         {
             var resource = new
             {
-                _links = new
-                {
-                    self = new { href = "/resource_that_is_redirected_to" }
-                },
                 type = "resource_that_is_redirected_to"
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
