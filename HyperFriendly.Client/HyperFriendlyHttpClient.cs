@@ -20,6 +20,13 @@ namespace HyperFriendly.Client
             _queryStringComposer = new QueryStringComposer();
         }
 
+        public async Task<dynamic> ResultAsJson()
+        {
+            var httpContent = CurrentResult.Content;
+            var content = await httpContent.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject(content);
+        }
+
         public async Task<HyperFriendlyHttpClient> Root()
         {
             var result = await _httpClient.GetAsync(_rootUri);
@@ -29,40 +36,44 @@ namespace HyperFriendly.Client
             };
         }
 
-        public async Task<dynamic> ResultAsJson()
-        {
-            var httpContent = CurrentResult.Content;
-            var content = await httpContent.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject(content);
-        }
-
         public async Task<HyperFriendlyHttpClient> Follow(string rel)
         {
-            var href = await GetHref(rel);
+            var link = await GetLink(rel);
 
-            var result = await _httpClient.GetAsync(href);
-            return new HyperFriendlyHttpClient(_httpClient, _rootUri)
-            {
-                CurrentResult = result
-            };
+            return await GetResult(link.Href, link.HttpMethod);
         }
 
         public async Task<HyperFriendlyHttpClient> Follow(string rel, object arguments)
         {
-            var href = await GetHref(rel);
-            var uri = _queryStringComposer.Compose(href, arguments);
-            var result = await _httpClient.GetAsync(uri);
+            var link = await GetLink(rel);
+            var href = _queryStringComposer.Compose(link.Href, arguments);
+            return await GetResult(href, link.HttpMethod);
+        }
+
+        private async Task<HyperFriendlyHttpClient> GetResult(string href, HttpMethod httpMethod)
+        {
+            var result = await _httpClient.SendAsync(new HttpRequestMessage(httpMethod, href));
             return new HyperFriendlyHttpClient(_httpClient, _rootUri)
             {
                 CurrentResult = result
             };
         }
 
-        private async Task<string> GetHref(string rel)
+        public async Task<HyperFriendlyHttpClient> Follow()
+        {
+            var location = CurrentResult.Headers.Location;
+            var result = await _httpClient.GetAsync(location.ToString());
+            return new HyperFriendlyHttpClient(_httpClient, _rootUri)
+            {
+                CurrentResult = result
+            };
+        }
+
+        private async Task<Link> GetLink(string rel)
         {
             JToken json = await ResultAsJson();
-            var links = json.SelectToken("_links." + rel);
-            return links.Value<string>("href");
+            var link = json.SelectToken("_links." + rel);
+            return link.ToObject<Link>();
         }
     }
 }
