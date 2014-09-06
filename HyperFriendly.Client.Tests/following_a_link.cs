@@ -24,6 +24,19 @@ namespace HyperFriendly.Client.Tests
         }
 
         [Fact]
+        public async Task can_get_a_resource_content_as_a_serialized_object()
+        {
+            var testServer = TestServer.Create<StartUp>();
+            var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
+
+            client = await client.Root();
+            client = await client.Follow("some_resource");
+            SomeResource resource = await client.Result<SomeResource>();
+
+            resource.Type.ShouldEqual("some_resource");
+        }
+
+        [Fact]
         public async Task can_follow_is_true_when_rel_exists()
         {
             var testServer = TestServer.Create<StartUp>();
@@ -60,7 +73,12 @@ namespace HyperFriendly.Client.Tests
             client = await client.Follow(rel);
             JToken json = await client.ResultAsJson();
 
-            json.Value<string>("type").ShouldEqual(rel);            
+            json.Value<string>("type").ShouldEqual(rel);
         }
+    }
+
+    public class SomeResource
+    {
+        public string Type { get; set; }
     }
 }

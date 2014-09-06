@@ -27,6 +27,13 @@ namespace HyperFriendly.Client
             return JsonConvert.DeserializeObject(content);
         }
 
+        public async Task<dynamic> Result<T>()
+        {
+            var httpContent = CurrentResult.Content;
+            var content = await httpContent.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(content);
+        }
+
         public async Task<HyperFriendlyHttpClient> Root()
         {
             var result = await _httpClient.GetAsync(_rootUri);
