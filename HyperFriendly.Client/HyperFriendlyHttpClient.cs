@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -32,6 +34,14 @@ namespace HyperFriendly.Client
             var httpContent = CurrentResult.Content;
             var content = await httpContent.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<T>(content);
+        }
+
+        public async Task<IEnumerable<T>> CollectionResult<T>()
+        {
+            var httpContent = CurrentResult.Content;
+            var content = await httpContent.ReadAsStringAsync();
+            var json = (JToken)JsonConvert.DeserializeObject(content);
+            return json.SelectToken("_items").Select(t => t.ToObject<T>());
         }
 
         public async Task<HyperFriendlyHttpClient> Root()

@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="fetching_a_root_resource.cs" />
+    <Compile Include="fetching_collections.cs" />
     <Compile Include="following_a_location_header.cs" />
     <Compile Include="following_a_link.cs" />
     <Compile Include="following_a_templated_link.cs" />
