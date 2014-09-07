@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -7,13 +8,23 @@ using Newtonsoft.Json.Linq;
 
 namespace HyperFriendly.Client
 {
-    public class HyperFriendlyHttpClient
+    public class HyperFriendlyHttpClient : IDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly string _rootUri;
         private readonly QueryStringComposer _queryStringComposer;
+        private HttpResponseMessage _currentResult;
 
-        public HttpResponseMessage CurrentResult { get; private set; }
+        public HttpResponseMessage CurrentResult
+        {
+            get { return _currentResult; }
+            private set
+            {
+                if (_currentResult != null)
+                    _currentResult.Dispose();
+                _currentResult = value;
+            }
+        }
 
         public HyperFriendlyHttpClient(HttpClient httpClient, string rootUri)
         {
@@ -50,17 +61,12 @@ namespace HyperFriendly.Client
             CurrentResult = result;
         }
 
-        public async Task Follow(string rel)
+        public async Task Follow(string rel, object arguments = null)
         {
             var link = await GetLink(rel);
-
-            await GetResult(link.Href, link.HttpMethod);
-        }
-
-        public async Task Follow(string rel, object arguments)
-        {
-            var link = await GetLink(rel);
-            var href = _queryStringComposer.Compose(link.Href, arguments);
+            var href = arguments != null
+                ? _queryStringComposer.Compose(link.Href, arguments)
+                : link.Href;
             await GetResult(href, link.HttpMethod);
         }
 
@@ -92,6 +98,12 @@ namespace HyperFriendly.Client
         public bool CanFollow()
         {
             return CurrentResult.Headers.Location != null;
+        }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
+            _currentResult.Dispose();
         }
     }
 }
