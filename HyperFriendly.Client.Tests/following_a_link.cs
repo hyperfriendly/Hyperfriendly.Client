@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading.Tasks;
 using HyperFriendly.Client.Tests.TestApi;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json.Linq;
@@ -21,6 +23,21 @@ namespace HyperFriendly.Client.Tests
             JToken json = await client.ResultAsJson();
 
             json.Value<string>("type").ShouldEqual("some_resource");
+        }
+
+        [Fact]
+        public async Task can_post_content_to_a_resource()
+        {
+            var testServer = TestServer.Create<StartUp>();
+            var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
+            var content = new { foo = "bar" };
+
+            await client.Root();
+            await client.Follow("some_resource_with_content", content);
+            JToken json = await client.ResultAsJson();
+
+            json.Value<string>("type").ShouldEqual("some_resource_with_content");
+            json.Value<string>("foo").ShouldEqual("bar");
         }
 
         [Fact]

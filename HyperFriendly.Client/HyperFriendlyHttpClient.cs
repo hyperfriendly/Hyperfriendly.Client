@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -61,18 +63,22 @@ namespace HyperFriendly.Client
             CurrentResult = result;
         }
 
-        public async Task Follow(string rel, object arguments = null)
+        public async Task Follow(string rel, object content = null, object arguments = null)
         {
             var link = await GetLink(rel);
             var href = arguments != null
                 ? _queryStringComposer.Compose(link.Href, arguments)
                 : link.Href;
-            await GetResult(href, link.HttpMethod);
+            await GetResult(href, link.HttpMethod, content);
         }
 
-        private async Task GetResult(string href, HttpMethod httpMethod)
+        private async Task GetResult(string href, HttpMethod httpMethod, object content)
         {
-            var result = await _httpClient.SendAsync(new HttpRequestMessage(httpMethod, href));
+            var message = new HttpRequestMessage(httpMethod, href);
+            if (content != null)
+                message.Content = new ObjectContent(content.GetType(), content, new JsonMediaTypeFormatter(),
+                    new MediaTypeHeaderValue("application/json"));
+            var result = await _httpClient.SendAsync(message);
             CurrentResult = result;
         }
 

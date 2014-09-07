@@ -16,6 +16,8 @@ namespace HyperFriendly.Client.Tests.TestApi
                 {
                     self = new { href = "/" },
                     some_resource = new { href = "/someresource" },
+                    some_resource_with_content = new { href = "/some_resource_with_content", method = "POST" },
+                    templated_resource_with_content = new { href = "/templated_resource_with_content", method = "POST" },
                     collection_resource = new { href = "/collection_resource" },
                     templated_resource = new { href = "/templated?foo={foo}" },
                     redirecting_resource = new { href = "/redirecting_resource" },
@@ -33,6 +35,27 @@ namespace HyperFriendly.Client.Tests.TestApi
             var resource = new
             {
                 type = "some_resource"
+            };
+            return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
+        }
+
+        [Route("templated_resource_with_content")]
+        public HttpResponseMessage PostTemplatedResourceWithContent(dynamic content)
+        {
+            var resource = new
+            {
+                type = "templated_resource_with_content",
+                content.foo
+            };
+            return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
+        }
+
+        [Route("some_resource_with_content")]
+        public HttpResponseMessage PostSomeResourceWithContent(dynamic content)
+        {
+            var resource = new
+            {
+                type = "some_resource_with_content", content.foo
             };
             return Request.CreateResponse(HttpStatusCode.OK, resource, "vnd/hyperfriendly+json");
         }
