@@ -22,5 +22,31 @@ namespace HyperFriendly.Client.Tests
 
             json.Value<string>("type").ShouldEqual("resource_that_is_redirected_to");
         }
+
+        [Fact]
+        public async Task can_follow_is_true_when_location_header_exists()
+        {
+            var testServer = TestServer.Create<StartUp>();
+            var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
+            await client.Root();
+            await client.Follow("redirecting_resource");
+
+            var canFollow = client.CanFollow();
+
+            canFollow.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task can_follow_is_false_when_location_header_does_not_exist()
+        {
+            var testServer = TestServer.Create<StartUp>();
+            var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
+            await client.Root();
+            await client.Follow("some_resource");
+
+            var canFollow = client.CanFollow();
+
+            canFollow.ShouldBeFalse();
+        }
     }
 }

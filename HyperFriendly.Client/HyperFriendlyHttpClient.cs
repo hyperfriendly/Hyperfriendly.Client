@@ -88,5 +88,10 @@ namespace HyperFriendly.Client
         {
             return await GetLink(rel) != null;
         }
+
+        public bool CanFollow()
+        {
+            return CurrentResult.Headers.Location != null;
+        }
     }
 }
