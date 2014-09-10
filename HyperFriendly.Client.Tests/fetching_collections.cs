@@ -15,9 +15,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
-            await client.Follow("collection_resource");
-            var result = await client.CollectionResult<SomeResource>();
+            await client.RootAsync();
+            await client.FollowAsync("collection_resource");
+            var result = client.CurrentResult.CollectionResult<SomeResource>();
 
             var items = result.ToArray();
             items.Count().ShouldEqual(2);

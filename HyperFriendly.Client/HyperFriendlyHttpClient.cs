@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace HyperFriendly.Client
 {
@@ -15,18 +11,8 @@ namespace HyperFriendly.Client
         private readonly HttpClient _httpClient;
         private readonly string _rootUri;
         private readonly QueryStringComposer _queryStringComposer;
-        private HttpResponseMessage _currentResult;
 
-        public HttpResponseMessage CurrentResult
-        {
-            get { return _currentResult; }
-            private set
-            {
-                if (_currentResult != null)
-                    _currentResult.Dispose();
-                _currentResult = value;
-            }
-        }
+        public HyperFriendlyResult CurrentResult { get; private set; }
 
         public HyperFriendlyHttpClient(HttpClient httpClient, string rootUri)
         {
@@ -35,70 +21,40 @@ namespace HyperFriendly.Client
             _queryStringComposer = new QueryStringComposer();
         }
 
-        public async Task<dynamic> ResultAsJson()
+        public async Task RootAsync()
         {
-            var httpContent = CurrentResult.Content;
-            var content = await httpContent.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject(content);
+            await GetResultAsync(_rootUri, HttpMethod.Get);
         }
 
-        public async Task<dynamic> Result<T>()
+        public async Task FollowAsync(string rel, object content = null, object arguments = null)
         {
-            var httpContent = CurrentResult.Content;
-            var content = await httpContent.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(content);
-        }
-
-        public async Task<IEnumerable<T>> CollectionResult<T>()
-        {
-            var httpContent = CurrentResult.Content;
-            var content = await httpContent.ReadAsStringAsync();
-            var json = (JToken)JsonConvert.DeserializeObject(content);
-            return json.SelectToken("_items").Select(t => t.ToObject<T>());
-        }
-
-        public async Task Root()
-        {
-            var result = await _httpClient.GetAsync(_rootUri);
-            CurrentResult = result;
-        }
-
-        public async Task Follow(string rel, object content = null, object arguments = null)
-        {
-            var link = await GetLink(rel);
+            var link = CurrentResult.GetLink(rel);
             var href = arguments != null
                 ? _queryStringComposer.Compose(link.Href, arguments)
                 : link.Href;
-            await GetResult(href, link.HttpMethod, content);
+            await GetResultAsync(href, link.HttpMethod, content);
         }
 
-        private async Task GetResult(string href, HttpMethod httpMethod, object content)
+        public async Task FollowAsync()
+        {
+            var location = CurrentResult.Headers.Location.AbsoluteUri;
+            await GetResultAsync(location, HttpMethod.Get);
+        }
+
+        private async Task GetResultAsync(string href, HttpMethod httpMethod, object content = null)
         {
             var message = new HttpRequestMessage(httpMethod, href);
             if (content != null)
                 message.Content = new ObjectContent(content.GetType(), content, new JsonMediaTypeFormatter(),
                     new MediaTypeHeaderValue("application/json"));
             var result = await _httpClient.SendAsync(message);
-            CurrentResult = result;
+            var jsonString = await result.Content.ReadAsStringAsync();
+            CurrentResult = new HyperFriendlyResult(jsonString, result.Headers, result.StatusCode);
         }
 
-        public async Task Follow()
+        public bool CanFollow(string rel)
         {
-            var location = CurrentResult.Headers.Location;
-            var result = await _httpClient.GetAsync(location.ToString());
-            CurrentResult = result;
-        }
-
-        private async Task<Link> GetLink(string rel)
-        {
-            JToken json = await ResultAsJson();
-            var link = json.SelectToken("_links." + rel);
-            return link == null ? null : link.ToObject<Link>();
-        }
-
-        public async Task<bool> CanFollow(string rel)
-        {
-            return await GetLink(rel) != null;
+            return CurrentResult.GetLink(rel) != null;
         }
 
         public bool CanFollow()
@@ -109,7 +65,6 @@ namespace HyperFriendly.Client
         public void Dispose()
         {
             _httpClient.Dispose();
-            _currentResult.Dispose();
         }
     }
 }

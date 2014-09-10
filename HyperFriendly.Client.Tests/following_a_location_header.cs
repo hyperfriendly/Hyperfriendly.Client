@@ -15,10 +15,10 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
-            await client.Follow("redirecting_resource");
-            await client.Follow();
-            JToken json = await client.ResultAsJson();
+            await client.RootAsync();
+            await client.FollowAsync("redirecting_resource");
+            await client.FollowAsync();
+            JToken json = client.CurrentResult.ToJson();
 
             json.Value<string>("type").ShouldEqual("resource_that_is_redirected_to");
         }
@@ -28,8 +28,8 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            await client.Root();
-            await client.Follow("redirecting_resource");
+            await client.RootAsync();
+            await client.FollowAsync("redirecting_resource");
 
             var canFollow = client.CanFollow();
 
@@ -41,8 +41,8 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            await client.Root();
-            await client.Follow("some_resource");
+            await client.RootAsync();
+            await client.FollowAsync("some_resource");
 
             var canFollow = client.CanFollow();
 

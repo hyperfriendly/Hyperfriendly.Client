@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using HyperFriendly.Client.Tests.TestApi;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json.Linq;
@@ -18,9 +16,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
-            await client.Follow("some_resource");
-            JToken json = await client.ResultAsJson();
+            await client.RootAsync();
+            await client.FollowAsync("some_resource");
+            JToken json = client.CurrentResult.ToJson();
 
             json.Value<string>("type").ShouldEqual("some_resource");
         }
@@ -32,9 +30,9 @@ namespace HyperFriendly.Client.Tests
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
             var content = new { foo = "bar" };
 
-            await client.Root();
-            await client.Follow("some_resource_with_content", content);
-            JToken json = await client.ResultAsJson();
+            await client.RootAsync();
+            await client.FollowAsync("some_resource_with_content", content);
+            JToken json = client.CurrentResult.ToJson();
 
             json.Value<string>("type").ShouldEqual("some_resource_with_content");
             json.Value<string>("foo").ShouldEqual("bar");
@@ -46,9 +44,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
-            await client.Follow("some_resource");
-            SomeResource resource = await client.Result<SomeResource>();
+            await client.RootAsync();
+            await client.FollowAsync("some_resource");
+            SomeResource resource = client.CurrentResult.ToObject<SomeResource>();
 
             resource.Type.ShouldEqual("some_resource");
         }
@@ -58,9 +56,9 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            await client.Root();
+            await client.RootAsync();
 
-            var canFollow = await client.CanFollow("some_resource");
+            var canFollow = client.CanFollow("some_resource");
 
             canFollow.ShouldBeTrue();
         }
@@ -70,9 +68,9 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            await client.Root();
+            await client.RootAsync();
 
-            var canFollow = await client.CanFollow("not_a_resource");
+            var canFollow = client.CanFollow("not_a_resource");
 
             canFollow.ShouldBeFalse();
         }
@@ -86,9 +84,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
-            await client.Follow(rel);
-            JToken json = await client.ResultAsJson();
+            await client.RootAsync();
+            await client.FollowAsync(rel);
+            JToken json = client.CurrentResult.ToJson();
 
             json.Value<string>("type").ShouldEqual(rel);
         }

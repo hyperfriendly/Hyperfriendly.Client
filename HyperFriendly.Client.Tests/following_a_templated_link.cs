@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using HyperFriendly.Client.Tests.TestApi;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json.Linq;
@@ -16,10 +14,10 @@ namespace HyperFriendly.Client.Tests
         {
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
-            await client.Root();
+            await client.RootAsync();
 
-            await client.Follow("templated_resource", arguments: new { foo = "bar" });
-            JToken json = await client.ResultAsJson();
+            await client.FollowAsync("templated_resource", arguments: new { foo = "bar" });
+            JToken json = client.CurrentResult.ToJson();
 
             json.Value<string>("type").ShouldEqual("templated_resource");
         }
@@ -31,9 +29,9 @@ namespace HyperFriendly.Client.Tests
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
             var content = new { foo = "bar" };
             var arguments = new {foo = "bar"};
-            await client.Root();
-            await client.Follow("templated_resource_with_content", content, arguments);
-            JToken json = await client.ResultAsJson();
+            await client.RootAsync();
+            await client.FollowAsync("templated_resource_with_content", content, arguments);
+            JToken json = client.CurrentResult.ToJson();
 
             json.Value<string>("type").ShouldEqual("templated_resource_with_content");
             json.Value<string>("foo").ShouldEqual("bar");

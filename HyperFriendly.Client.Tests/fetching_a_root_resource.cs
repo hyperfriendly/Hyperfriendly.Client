@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using HyperFriendly.Client.Tests.TestApi;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json.Linq;
@@ -15,9 +16,9 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
+            await client.RootAsync();
 
-            client.CurrentResult.IsSuccessStatusCode.ShouldBeTrue("Actual: " + client.CurrentResult.StatusCode);
+            client.CurrentResult.StatusCode.ShouldEqual(HttpStatusCode.OK);
         }
 
         [Fact]
@@ -26,8 +27,8 @@ namespace HyperFriendly.Client.Tests
             var testServer = TestServer.Create<StartUp>();
             var client = new HyperFriendlyHttpClient(testServer.HttpClient, Uris.Home);
 
-            await client.Root();
-            JToken jsonResult = await client.ResultAsJson();
+            await client.RootAsync();
+            JToken jsonResult = client.CurrentResult.ToJson();
 
             jsonResult
                 .SelectToken("_links.self.href")
